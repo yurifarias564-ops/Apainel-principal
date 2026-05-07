@@ -1,0 +1,16 @@
+{
+  "empresa": {
+    "nome": "Painel CRM",
+    "logo_url": "",
+    "cor_primaria": "#3b82f6",
+    "cor_secundaria": "#1e3a8a"
+  },
+  "kommo": {
+    "subdomain": "",
+    "token": ""
+  },
+  "painel": {
+    "meta_mes_padrao": 50000,
+    "refresh_minutos": 30
+  }
+}
