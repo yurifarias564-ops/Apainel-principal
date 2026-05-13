@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>__CNOME__ &mdash; Painel Corretor</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#07090f;color:#eaeef7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;min-height:100vh}
+.header{background:linear-gradient(135deg,__CCOR__,__CCOR2__);padding:18px 20px;display:flex;align-items:center;justify-content:space-between}
+.header-title{font-size:18px;font-weight:700}
+.header-sub{font-size:12px;opacity:.8;margin-top:2px}
+.tab-bar{display:flex;background:#0d1117;border-bottom:1px solid #1d2740;overflow-x:auto}
+.tab-btn{flex-shrink:0;background:transparent;border:none;border-bottom:2px solid transparent;color:#64748b;font-size:12px;font-weight:600;padding:12px 14px;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
+.tab-btn.active{color:__CCOR__;border-bottom-color:__CCOR__}
+.tab-btn:hover:not(.active){color:#eaeef7}
+.tab-content{display:none;padding:16px;max-width:700px;margin:0 auto}
+.tab-content.active{display:block}
+.card{background:#0f1320;border:1px solid #1d2740;border-radius:12px;padding:18px 20px;margin-bottom:14px}
+.card-title{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px}
+.metric{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #1a2236}
+.metric:last-child{border-bottom:none}
+.metric-label{font-size:13px;color:#8590a8}
+.metric-value{font-size:15px;font-weight:700}
+.green{color:#22c55e} .yellow{color:#f59e0b} .red{color:#ef4444} .blue{color:#3b82f6}
+.stat-big{text-align:center;padding:14px 0}
+.stat-big .num{font-size:40px;font-weight:800;background:linear-gradient(135deg,__CCOR__,__CCOR2__);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-big .lbl{font-size:12px;color:#64748b;margin-top:4px}
+/* Pipeline */
+.pipeline-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #1a2236}
+.pipeline-item:last-child{border-bottom:none}
+.pipeline-dot{width:10px;height:10px;border-radius:50%;background:__CCOR__;flex-shrink:0}
+.pipeline-name{font-size:13px;color:#eaeef7;flex:1}
+.pipeline-count{font-size:12px;font-weight:700;color:#8590a8}
+/* Meta animada */
+.meta-wrap{margin-top:12px}
+.meta-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.meta-valor{font-size:28px;font-weight:800;color:#22c55e}
+.meta-falta{font-size:12px;color:#64748b}
+.meta-bar{height:12px;background:#1a2236;border-radius:6px;overflow:hidden;margin-bottom:6px;position:relative}
+.meta-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,__CCOR__,__CCOR2__);transition:width 1.2s cubic-bezier(.22,1,.36,1);position:relative}
+.meta-fill::after{content:'';position:absolute;right:0;top:0;bottom:0;width:3px;background:rgba(255,255,255,.5);border-radius:3px}
+.meta-pct-badge{display:inline-block;background:linear-gradient(135deg,__CCOR__,__CCOR2__);color:#fff;font-size:12px;font-weight:800;padding:3px 10px;border-radius:20px;margin-right:6px}
+.meta-labels{display:flex;justify-content:space-between;font-size:11px;color:#64748b;margin-top:4px}
+/* Follow-up alerts */
+.followup-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #1a2236;cursor:pointer}
+.followup-item:last-child{border-bottom:none}
+.followup-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.followup-name{font-size:13px;font-weight:600;color:#eaeef7}
+.followup-dias{font-size:11px;color:#64748b;margin-top:2px}
+.followup-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;flex-shrink:0}
+.badge-red{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3)}
+.badge-yellow{background:rgba(245,158,11,.15);color:#f59e0b;border:1px solid rgba(245,158,11,.3)}
+/* Agenda */
+.agenda-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #1a2236;align-items:flex-start}
+.agenda-item:last-child{border-bottom:none}
+.agenda-hora{font-size:13px;font-weight:700;color:__CCOR__;min-width:44px;flex-shrink:0;padding-top:2px}
+.agenda-body{flex:1}
+.agenda-nome{font-size:13px;font-weight:600;color:#eaeef7}
+.agenda-end{font-size:11px;color:#8590a8;margin-top:2px}
+.agenda-del{background:transparent;border:none;color:#4a5568;cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px;flex-shrink:0}
+.agenda-del:hover{color:#ef4444}
+.agenda-form{display:flex;flex-direction:column;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid #1d2740}
+.agenda-form input,.agenda-form textarea{background:#131a2b;border:1px solid #1d2740;color:#eaeef7;padding:8px 10px;border-radius:7px;font-size:12.5px;font-family:inherit;outline:none}
+.agenda-form input:focus,.agenda-form textarea:focus{border-color:__CCOR__}
+.agenda-add-btn{background:__CCOR__;border:none;color:#fff;font-size:12.5px;font-weight:700;padding:9px;border-radius:8px;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.agenda-add-btn:hover{opacity:.85}
+/* Histórico */
+.hist-bar-wrap{margin-bottom:12px}
+.hist-label{display:flex;justify-content:space-between;font-size:12px;color:#8590a8;margin-bottom:4px}
+.hist-bar{height:10px;background:#1a2236;border-radius:5px;overflow:hidden}
+.hist-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,__CCOR__,__CCOR2__);transition:width .8s}
+.logout-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:600;padding:7px 14px;border-radius:7px;cursor:pointer;font-family:inherit;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <div class="header-title">&#127968; __CNOME__</div>
+    <div class="header-sub">Painel do Corretor</div>
+  </div>
+  <a href="/logout" class="logout-btn">Sair</a>
+</div>
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('hoje')">&#128197; Hoje</button>
+  <button class="tab-btn" onclick="switchTab('agenda')">&#128467; Agenda</button>
+  <button class="tab-btn" onclick="switchTab('pipeline')">&#128202; Pipeline</button>
+  <button class="tab-btn" onclick="switchTab('clientes')">&#128101; Clientes</button>
+  <button class="tab-btn" onclick="switchTab('comissao')">&#128176; Comiss&#227;o</button>
+</div>
+
+<!-- ABA: HOJE -->
+<div id="tab-hoje" class="tab-content active">
+  <div class="card" style="margin-top:4px">
+    <div class="card-title">Resumo de hoje</div>
+    <div class="stat-big">
+      <div class="num" id="hoje-leads">&#8212;</div>
+      <div class="lbl">novos leads hoje</div>
+    </div>
+    <div class="metric"><span class="metric-label">Em aberto</span><span class="metric-value" id="hoje-aberto">&#8212;</span></div>
+    <div class="metric"><span class="metric-label">Conversas hoje</span><span class="metric-value" id="hoje-conv">&#8212;</span></div>
+  </div>
+  <div class="card">
+    <div class="card-title">&#128680; Follow-up necessário</div>
+    <div id="followup-list"><div style="text-align:center;padding:16px;color:#5a657d;font-size:12px">Carregando...</div></div>
+  </div>
+</div>
+
+<!-- ABA: AGENDA -->
+<div id="tab-agenda" class="tab-content">
+  <div class="card" style="margin-top:4px">
+    <div class="card-title">Visitas de hoje — <span id="agenda-data">&#8212;</span></div>
+    <div id="agenda-list"><div style="text-align:center;padding:16px;color:#5a657d;font-size:12px">Nenhuma visita agendada.</div></div>
+    <div class="agenda-form">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <input type="time" id="ag-hora" placeholder="Horário"/>
+        <input type="text" id="ag-nome" placeholder="Nome do cliente"/>
+      </div>
+      <input type="text" id="ag-end" placeholder="Endereço / link da visita"/>
+      <button class="agenda-add-btn" onclick="agendaAdicionar()">+ Adicionar visita</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Próximas visitas</div>
+    <div id="agenda-proximas"><div style="text-align:center;padding:12px;color:#5a657d;font-size:12px">Nenhuma.</div></div>
+  </div>
+</div>
+
+<!-- ABA: PIPELINE -->
+<div id="tab-pipeline" class="tab-content">
+  <div class="card" style="margin-top:4px">
+    <div class="card-title">Funil de vendas</div>
+    <div id="pipeline-list"><div style="text-align:center;padding:20px;color:#5a657d">Carregando...</div></div>
+  </div>
+  <div class="card">
+    <div class="stat-big">
+      <div class="num" id="pipe-total">&#8212;</div>
+      <div class="lbl">leads no pipeline</div>
+    </div>
+  </div>
+</div>
+
+<!-- ABA: CLIENTES -->
+<div id="tab-clientes" class="tab-content">
+  <div class="card" style="margin-top:4px">
+    <div class="card-title">Base de clientes</div>
+    <div class="metric"><span class="metric-label">Total de contatos</span><span class="metric-value" id="cli-total">&#8212;</span></div>
+    <div class="metric"><span class="metric-label">Ativos (30 dias)</span><span class="metric-value green" id="cli-ativos">&#8212;</span></div>
+    <div class="metric"><span class="metric-label">Leads ganhos</span><span class="metric-value green" id="cli-ganhos">&#8212;</span></div>
+    <div class="metric"><span class="metric-label">Leads perdidos</span><span class="metric-value red" id="cli-perdidos">&#8212;</span></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Taxa de conversão</div>
+    <div class="stat-big">
+      <div class="num" id="cli-taxa">&#8212;</div>
+      <div class="lbl">% de conversão total</div>
+    </div>
+  </div>
+</div>
+
+<!-- ABA: COMISSÃO -->
+<div id="tab-comissao" class="tab-content">
+  <div class="card" style="margin-top:4px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="card-title" style="margin-bottom:0">Meta do mês — comissão</div>
+      <button onclick="toggleConfigComissao()" style="background:transparent;border:1px solid #1d2740;color:#8590a8;font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:inherit">⚙ Configurar</button>
+    </div>
+    <div id="config-comissao" style="display:none;background:#131a2b;border:1px solid #1d2740;border-radius:8px;padding:12px;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Minhas configurações</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div>
+          <label style="font-size:11px;color:#8590a8;display:block;margin-bottom:4px">Minha comissão (%)</label>
+          <input type="number" id="cfg-pct" min="0" max="100" step="0.5" placeholder="ex: 3" style="width:100%;background:#0f1320;border:1px solid #1d2740;color:#eaeef7;padding:7px 10px;border-radius:7px;font-size:13px;font-family:inherit;outline:none"/>
+        </div>
+        <div>
+          <label style="font-size:11px;color:#8590a8;display:block;margin-bottom:4px">Meta mensal (R$)</label>
+          <input type="number" id="cfg-meta" min="0" step="500" placeholder="ex: 5000" style="width:100%;background:#0f1320;border:1px solid #1d2740;color:#eaeef7;padding:7px 10px;border-radius:7px;font-size:13px;font-family:inherit;outline:none"/>
+        </div>
+      </div>
+      <button onclick="salvarConfig()" style="background:__CCOR__;border:none;color:#fff;font-size:12.5px;font-weight:700;padding:8px 18px;border-radius:7px;cursor:pointer;font-family:inherit;width:100%">Salvar configurações</button>
+    </div>
+    <div class="meta-wrap">
+      <div class="meta-top">
+        <div class="meta-valor" id="com-valor">R$ &#8212;</div>
+        <div class="meta-falta">falta <b id="com-falta" style="color:#eaeef7">R$ &#8212;</b></div>
+      </div>
+      <div class="meta-bar">
+        <div class="meta-fill" id="com-meta-bar" style="width:0%"></div>
+      </div>
+      <div style="display:flex;align-items:center;margin-top:6px">
+        <span class="meta-pct-badge" id="com-meta-pct">0%</span>
+        <span style="font-size:11px;color:#64748b">da meta de <span id="com-meta-label">R$ —</span></span>
+      </div>
+      <div class="meta-labels">
+        <span>R$ 0</span><span id="com-meta-label2">R$ —</span>
+      </div>
+    </div>
+    <div style="border-top:1px solid #1a2236;margin-top:14px;padding-top:12px">
+      <div class="metric"><span class="metric-label">Negócios ganhos</span><span class="metric-value green" id="com-ganhos">&#8212;</span></div>
+      <div class="metric"><span class="metric-label">Ticket médio</span><span class="metric-value" id="com-ticket">&#8212;</span></div>
+      <div class="metric"><span class="metric-label" id="com-pct-label">Comissão</span><span class="metric-value" id="com-base">&#8212;</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Histórico mensal de comissões</div>
+    <div id="hist-comissoes">
+      <div style="text-align:center;padding:16px;color:#5a657d;font-size:12px">Carregando...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+var _dadosCarregados = null;
+var _tabAtiva = 'hoje';
+var COMISSAO_PCT = parseFloat(localStorage.getItem('cor_pct')) || 0;
+var META_COMISSAO = parseFloat(localStorage.getItem('cor_meta')) || 0;
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if(name==='comissao') checkConfigurado();
+  var tabs = ['hoje','agenda','pipeline','clientes','comissao'];
+  document.querySelectorAll('.tab-btn')[tabs.indexOf(name)].classList.add('active');
+  _tabAtiva = name;
+  if(_dadosCarregados) renderTab(name, _dadosCarregados);
+}
+
+function fmt(n){ return (n===null||n===undefined)?'&#8212;':String(n); }
+function fmtBRL(n){ if(!n&&n!==0)return 'R$ &#8212;'; return 'R$ '+parseFloat(n).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+
+/* ── CONFIG COMISSÃO ── */
+function toggleConfigComissao(forceOpen){
+  var el=document.getElementById('config-comissao');
+  var visible=el.style.display!=='none'&&!forceOpen;
+  el.style.display=visible?'none':'block';
+  if(!visible||forceOpen){
+    document.getElementById('cfg-pct').value=COMISSAO_PCT||'';
+    document.getElementById('cfg-meta').value=META_COMISSAO||'';
+  }
+}
+function checkConfigurado(){
+  if(META_COMISSAO===0||COMISSAO_PCT===0){
+    var warn=document.getElementById('comissao-aviso');
+    if(warn) warn.style.display='block';
+  }
+}
+
+function salvarConfig(){
+  var pct=parseFloat(document.getElementById('cfg-pct').value);
+  var meta=parseFloat(document.getElementById('cfg-meta').value);
+  if(isNaN(pct)||pct<0||pct>100){alert('Comissão inválida (0–100%)');return;}
+  if(isNaN(meta)||meta<0){alert('Meta inválida');return;}
+  COMISSAO_PCT=pct; META_COMISSAO=meta;
+  try{localStorage.setItem('cor_pct',pct);localStorage.setItem('cor_meta',meta);}catch(e){}
+  document.getElementById('config-comissao').style.display='none';
+  var _ml=document.getElementById('com-meta-label');if(_ml)_ml.textContent=fmtBRL(META_COMISSAO);
+  var _ml2=document.getElementById('com-meta-label2');if(_ml2)_ml2.textContent=fmtBRL(META_COMISSAO);
+  if(_dadosCarregados) renderTab('comissao',_dadosCarregados);
+}
+
+/* ── AGENDA (localStorage) ── */
+function agendaChave(){ return 'agenda_' + new Date().toISOString().slice(0,10); }
+function agendaCarregar(){ try{ return JSON.parse(localStorage.getItem(agendaChave())||'[]'); }catch(e){ return []; } }
+function agendaSalvar(items){ try{ localStorage.setItem(agendaChave(), JSON.stringify(items)); }catch(e){} }
+
+function agendaAdicionar(){
+  var hora = document.getElementById('ag-hora').value;
+  var nome = document.getElementById('ag-nome').value.trim();
+  var end  = document.getElementById('ag-end').value.trim();
+  if(!hora || !nome){ alert('Preencha horário e nome.'); return; }
+  var items = agendaCarregar();
+  items.push({hora, nome, end, id: Date.now()});
+  items.sort((a,b)=>a.hora.localeCompare(b.hora));
+  agendaSalvar(items);
+  document.getElementById('ag-hora').value='';
+  document.getElementById('ag-nome').value='';
+  document.getElementById('ag-end').value='';
+  renderAgenda();
+}
+
+function agendaRemover(id){
+  var items = agendaCarregar().filter(i=>i.id!==id);
+  agendaSalvar(items);
+  renderAgenda();
+}
+
+function renderAgenda(){
+  var hoje = new Date();
+  document.getElementById('agenda-data').textContent = hoje.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
+  var items = agendaCarregar();
+  var listEl = document.getElementById('agenda-list');
+  if(!items.length){
+    listEl.innerHTML = '<div style="text-align:center;padding:16px;color:#5a657d;font-size:12px">Nenhuma visita agendada para hoje.</div>';
+  } else {
+    listEl.innerHTML = items.map(item=>
+      '<div class="agenda-item">' +
+      '<div class="agenda-hora">'+(item.hora||'—')+'</div>' +
+      '<div class="agenda-body">' +
+      '<div class="agenda-nome">'+escHtml(item.nome)+'</div>' +
+      (item.end?'<div class="agenda-end">&#128205; '+escHtml(item.end)+'</div>':'') +
+      '</div>' +
+      '<button class="agenda-del" onclick="agendaRemover('+item.id+')">✕</button>' +
+      '</div>'
+    ).join('');
+  }
+
+  /* Próximas visitas (próximos 7 dias, exceto hoje) */
+  var proxItems = [];
+  for(var i=1;i<=7;i++){
+    var d = new Date(); d.setDate(d.getDate()+i);
+    var chave = 'agenda_'+d.toISOString().slice(0,10);
+    try{
+      var arr = JSON.parse(localStorage.getItem(chave)||'[]');
+      arr.forEach(it=>proxItems.push({...it, data:d.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'})}));
+    }catch(e){}
+  }
+  var proxEl = document.getElementById('agenda-proximas');
+  if(!proxItems.length){
+    proxEl.innerHTML = '<div style="text-align:center;padding:12px;color:#5a657d;font-size:12px">Nenhuma visita nos próximos 7 dias.</div>';
+  } else {
+    proxEl.innerHTML = proxItems.map(it=>
+      '<div class="agenda-item">' +
+      '<div class="agenda-hora" style="min-width:64px;font-size:11px;line-height:1.4">'+it.data+'<br/><span style="font-size:13px">'+it.hora+'</span></div>'+
+      '<div class="agenda-body"><div class="agenda-nome">'+escHtml(it.nome)+'</div>'+(it.end?'<div class="agenda-end">'+escHtml(it.end)+'</div>':'')+
+      '</div></div>'
+    ).join('');
+  }
+}
+
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ── RENDER TABS ── */
+function renderTab(name, d){
+  var funis = d.funis || [];
+  var leads = d.leads || [];
+  var hoje = new Date(); hoje.setHours(0,0,0,0);
+
+  if(name==='hoje'){
+    var novosHoje = leads.filter(l=>{var dt=new Date(l.created_at*1000);dt.setHours(0,0,0,0);return dt.getTime()===hoje.getTime();}).length;
+    document.getElementById('hoje-leads').textContent = novosHoje;
+    var aberto = leads.filter(l=>!l.closed_at&&!l.loss_reason_id).length;
+    document.getElementById('hoje-aberto').textContent = aberto;
+    var convHoje = leads.filter(l=>{var dt=l.updated_at?new Date(l.updated_at*1000):null;if(!dt)return false;dt.setHours(0,0,0,0);return dt.getTime()===hoje.getTime();}).length;
+    document.getElementById('hoje-conv').textContent = convHoje;
+
+    /* Follow-up */
+    var fl = document.getElementById('followup-list');
+    var semContato = leads
+      .filter(l=>!l.closed_at&&!l.loss_reason_id)
+      .map(l=>({nome:l.name||l.nome||'Lead', dias:l.updated_at?Math.floor((Date.now()/1000-l.updated_at)/86400):999}))
+      .filter(l=>l.dias>=2)
+      .sort((a,b)=>b.dias-a.dias)
+      .slice(0,10);
+
+    if(!semContato.length){
+      fl.innerHTML='<div style="text-align:center;padding:14px;color:#22c55e;font-size:12px">&#10003; Todos os leads têm contato recente!</div>';
+    } else {
+      fl.innerHTML = semContato.map(l=>{
+        var urgente = l.dias>=5;
+        return '<div class="followup-item">' +
+          '<div class="followup-dot" style="background:'+(urgente?'#ef4444':'#f59e0b')+'"></div>'+
+          '<div style="flex:1"><div class="followup-name">'+escHtml(l.nome)+'</div>'+
+          '<div class="followup-dias">Sem contato há '+l.dias+' dia'+(l.dias>1?'s':'')+'</div></div>'+
+          '<span class="followup-badge '+(urgente?'badge-red':'badge-yellow')+'">'+(urgente?'Urgente':'Atenção')+'</span>'+
+          '</div>';
+      }).join('');
+    }
+  }
+
+  if(name==='agenda'){ renderAgenda(); }
+
+  if(name==='pipeline'){
+    var pipeList = document.getElementById('pipeline-list');
+    pipeList.innerHTML='';
+    var total=0;
+    funis.forEach(f=>{
+      var cnt=(f.leads||[]).length; total+=cnt;
+      var el=document.createElement('div');el.className='pipeline-item';
+      el.innerHTML='<div class="pipeline-dot"></div><div class="pipeline-name">'+(f.nome||f.name||'—')+'</div><div class="pipeline-count">'+cnt+'</div>';
+      pipeList.appendChild(el);
+    });
+    document.getElementById('pipe-total').textContent=total;
+  }
+
+  if(name==='clientes'){
+    var umMes=Date.now()/1000-30*86400;
+    var ganhos=leads.filter(l=>l.closed_at&&!l.loss_reason_id);
+    var perdidos=leads.filter(l=>l.loss_reason_id);
+    document.getElementById('cli-total').textContent=leads.length;
+    document.getElementById('cli-ativos').textContent=leads.filter(l=>l.updated_at&&l.updated_at>umMes).length;
+    document.getElementById('cli-ganhos').textContent=ganhos.length;
+    document.getElementById('cli-perdidos').textContent=perdidos.length;
+    document.getElementById('cli-taxa').textContent=(leads.length>0?Math.round(ganhos.length/leads.length*100):0)+'%';
+  }
+
+  if(name==='comissao'){
+    /* Mês atual */
+    var agora=new Date();
+    var inicioMes=new Date(agora.getFullYear(),agora.getMonth(),1,0,0,0,0);
+    var ganhosMes=leads.filter(l=>{
+      if(!l.closed_at||l.loss_reason_id)return false;
+      var d=new Date(l.closed_at*1000);
+      return d>=inicioMes;
+    });
+    var valorMes=ganhosMes.reduce((s,l)=>s+(l.sale||0),0);
+    var comissao=valorMes*(COMISSAO_PCT/100);
+    var falta=Math.max(0,META_COMISSAO-comissao);
+    var pctMeta=META_COMISSAO>0?Math.min(100,Math.round(comissao/META_COMISSAO*100)):0;
+    var ticket=ganhosMes.length>0?valorMes/ganhosMes.length:0;
+
+    document.getElementById('com-valor').textContent=fmtBRL(comissao);
+    document.getElementById('com-falta').textContent=fmtBRL(falta);
+    document.getElementById('com-ganhos').textContent=ganhosMes.length;
+    document.getElementById('com-ticket').textContent=fmtBRL(ticket);
+    document.getElementById('com-base').textContent=fmtBRL(valorMes)+' total';
+    document.getElementById('com-pct-label').textContent='Comissão ('+COMISSAO_PCT+'%)';
+    /* Update meta labels */
+    var metaLabels=document.querySelectorAll('.meta-labels span');
+    if(metaLabels.length>=2)metaLabels[1].textContent=fmtBRL(META_COMISSAO).replace('&#8212;','—');
+    var metaInfo=document.querySelector('[style*="meta de R$"]');
+    if(metaInfo)metaInfo.innerHTML='<span class="meta-pct-badge" id="com-meta-pct">'+pctMeta+'%</span><span style="font-size:11px;color:#64748b">da meta de '+fmtBRL(META_COMISSAO)+'</span>';
+    document.getElementById('com-meta-pct').textContent=pctMeta+'%';
+
+    /* Anima a barra depois de um frame */
+    requestAnimationFrame(function(){
+      setTimeout(function(){
+        document.getElementById('com-meta-bar').style.width=pctMeta+'%';
+  var _ml=document.getElementById('com-meta-label');if(_ml)_ml.textContent=fmtBRL(META_COMISSAO);
+  var _ml2=document.getElementById('com-meta-label2');if(_ml2)_ml2.textContent=fmtBRL(META_COMISSAO);
+      },100);
+    });
+
+    /* Histórico últimos 6 meses */
+    var meses=[];
+    for(var i=5;i>=0;i--){
+      var ano=agora.getFullYear(), mes=agora.getMonth()-i;
+      while(mes<0){mes+=12;ano--;}
+      var ini=new Date(ano,mes,1,0,0,0,0);
+      var fim=new Date(ano,mes+1,0,23,59,59,999);
+      var g=leads.filter(l=>{if(!l.closed_at||l.loss_reason_id)return false;var d=new Date(l.closed_at*1000);return d>=ini&&d<=fim;});
+      var val=g.reduce((s,l)=>s+(l.sale||0),0);
+      meses.push({label:ini.toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}),comissao:val*(COMISSAO_PCT/100),ganhos:g.length});
+    }
+    var maxC=Math.max(...meses.map(m=>m.comissao),1);
+    var histEl=document.getElementById('hist-comissoes');
+    histEl.innerHTML=meses.map((m,i)=>{
+      var pct=Math.round(m.comissao/maxC*100);
+      var isCurrent=i===5;
+      return '<div class="hist-bar-wrap">'+
+        '<div class="hist-label"><span style="font-weight:'+(isCurrent?'700':'400')+';color:'+(isCurrent?'#eaeef7':'#8590a8')+'">'+m.label+(isCurrent?' (atual)':'')+'</span>'+
+        '<span style="color:'+(isCurrent?'#22c55e':'#64748b')+';font-weight:700">'+fmtBRL(m.comissao)+' &nbsp;<span style="font-weight:400;color:#5a657d">'+m.ganhos+' fechado'+(m.ganhos!==1?'s':'')+'</span></span></div>'+
+        '<div class="hist-bar"><div class="hist-fill" style="width:'+pct+'%;'+(isCurrent?'opacity:1':'opacity:.6')+'"></div></div>'+
+        '</div>';
+    }).join('');
+  }
+}
+
+async function carregarDados(){
+  try{
+    var r=await fetch('/api/dados');
+    if(!r.ok)return;
+    var j=await r.json();
+    _dadosCarregados=j.dados||{};
+    renderTab(_tabAtiva,_dadosCarregados);
+  }catch(e){console.error(e);}
+}
+
+/* Init */
+renderAgenda();
+carregarDados();
+setInterval(carregarDados,120000);
+</script>
+</body>
+</html>"""
+
+
+
+ADMIN_HTML = """<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Admin &mdash; Painel CRM</title>
+<style>
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{background:#07090f;color:#eaeef7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;min-height:100vh;padding:32px 24px 60px}}
+h1{{font-size:22px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:10px}}
+h1::before{{content:"";display:inline-block;width:6px;height:24px;background:linear-gradient(180deg,#3b82f6,#1e3a8a);border-radius:3px}}
+.sub{{color:#8590a8;font-size:12.5px;margin-bottom:20px;margin-top:2px}}
+.topbar{{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:12px}}
+.logout-btn{{background:transparent;border:1px solid #1d2740;color:#8590a8;font-size:12px;font-weight:600;padding:7px 14px;border-radius:7px;cursor:pointer;font-family:inherit;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}}
+.logout-btn:hover{{color:#ef4444;border-color:#ef4444}}
+/* Tabs */
+.tab-bar{{display:flex;gap:0;border-bottom:1px solid #1d2740;margin-bottom:24px}}
+.tab-btn{{background:transparent;border:none;border-bottom:2px solid transparent;color:#64748b;font-size:13px;font-weight:600;padding:10px 20px;cursor:pointer;font-family:inherit;transition:all .15s;margin-bottom:-1px}}
+.tab-btn.active{{color:#3b82f6;border-bottom-color:#3b82f6}}
+.tab-btn:hover:not(.active){{color:#eaeef7}}
+.tab-content{{display:block}}
+.tab-content.hidden{{display:none}}
+/* Forms */
+.add-form{{background:#0f1320;border:1px solid #1d2740;border-radius:12px;padding:22px 24px;margin-bottom:28px}}
+.add-form h2{{font-size:14px;font-weight:700;margin-bottom:16px;color:#eaeef7}}
+.form-grid{{display:grid;grid-template-columns:1fr 1fr;gap:12px}}
+@media(max-width:600px){{.form-grid{{grid-template-columns:1fr}}}}
+.form-group{{display:flex;flex-direction:column;gap:5px}}
+label{{font-size:11px;color:#8590a8;text-transform:uppercase;letter-spacing:.07em;font-weight:700}}
+input,select{{background:#131a2b;border:1px solid #1d2740;color:#eaeef7;padding:9px 12px;border-radius:7px;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s}}
+input:focus,select:focus{{border-color:#3b82f6}}
+.add-btn{{background:#1e3a8a;border:none;color:#fff;font-size:13px;font-weight:700;padding:10px 20px;border-radius:8px;cursor:pointer;font-family:inherit;margin-top:8px;transition:background .15s}}
+.add-btn:hover{{background:#2c4dbd}}
+/* Clients */
+.clients-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}}
+.client-card{{background:#0f1320;border:1px solid #1d2740;border-radius:12px;padding:18px 20px}}
+.client-card.bloqueado{{border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.04)}}
+.client-top{{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}}
+.client-name{{font-size:15px;font-weight:700}}
+.client-user{{font-size:11.5px;color:#8590a8;margin-top:2px}}
+.status-badge{{padding:3px 10px;border-radius:20px;font-size:10.5px;font-weight:700;text-transform:uppercase}}
+.status-badge.ativo{{background:rgba(34,197,94,.13);color:#22c55e;border:1px solid rgba(34,197,94,.25)}}
+.status-badge.bloqueado{{background:rgba(239,68,68,.13);color:#ef4444;border:1px solid rgba(239,68,68,.25)}}
+.client-info{{font-size:11.5px;color:#8590a8;margin-bottom:14px;line-height:1.7}}
+.client-info b{{color:#eaeef7}}
+.client-actions{{display:flex;gap:8px;flex-wrap:wrap}}
+.btn-sm{{font-size:11.5px;font-weight:700;padding:6px 12px;border-radius:6px;cursor:pointer;font-family:inherit;border:none;transition:all .15s}}
+.btn-block{{background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.3)}}
+.btn-block:hover{{background:rgba(239,68,68,.25)}}
+.btn-unblock{{background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.3)}}
+.btn-unblock:hover{{background:rgba(34,197,94,.25)}}
+.btn-view{{background:rgba(59,130,246,.12);color:#3b82f6;border:1px solid rgba(59,130,246,.3)}}
+.btn-view:hover{{background:rgba(59,130,246,.25)}}
+.btn-del{{background:transparent;color:#5a657d;border:1px solid #1d2740}}
+.btn-del:hover{{color:#ef4444;border-color:#ef4444}}
+.msg{{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#22c55e;padding:10px 14px;border-radius:8px;font-size:12.5px;margin-bottom:20px;display:{msg_display}}}
+.empty{{text-align:center;padding:48px 20px;color:#5a657d;font-size:13px}}
+/* Corretores */
+.cor-card{{background:#0f1320;border:1px solid #1d2740;border-radius:12px;padding:18px 20px}}
+.cor-card.bloqueado{{border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.04)}}
+.cor-avatar{{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex-shrink:0;color:#fff}}
+.cor-name{{font-size:15px;font-weight:700}}
+.cor-user{{font-size:11.5px;color:#8590a8;margin-top:2px}}
+.cor-info{{font-size:11.5px;color:#8590a8;margin:10px 0 14px;line-height:1.7}}
+.cor-info b{{color:#eaeef7}}
+.corretores-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}}
+</style>
+</head>
+<body>
+<div style="max-width:1100px;margin:0 auto">
+<div class="topbar">
+  <div>
+    <h1>Admin &mdash; Painel CRM</h1>
+    <p class="sub">Gerencie todos os clientes e configurações</p>
+  </div>
+  <div style="display:flex;gap:8px">
+    <a href="/admin/meu-painel" class="logout-btn" style="background:#1e3a8a;color:#fff;border-color:#2c4dbd">Meu Painel</a>
+    <a href="/logout" class="logout-btn">Sair</a>
+  </div>
+</div>
+<div class="msg">{msg}</div>
+
+<!-- Tab bar -->
+<div class="tab-bar">
+  <button class="tab-btn active" id="tbClientes" onclick="switchTab('clientes')">👥 Clientes</button>
+  <button class="tab-btn" id="tbEmails" onclick="switchTab('emails')">📧 Emails</button>
+  <button class="tab-btn" id="tbCanais" onclick="switchTab('canais')">🔗 Canais & QR</button>
+  <button class="tab-btn" id="tbCorretores" onclick="switchTab('corretores')">🏠 Corretores</button>
+</div>
+
+<!-- Tab: Clientes -->
+<div id="tab-clientes" class="tab-content">
+<div class="add-form">
+  <h2>➕ Adicionar novo cliente</h2>
+  <form method="POST" action="/admin/add" enctype="multipart/form-data">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Usuario (login)</label>
+        <input type="text" name="username" placeholder="ex: empresa_abc" required/>
+      </div>
+      <div class="form-group">
+        <label>Senha</label>
+        <input type="password" name="password" placeholder="senha do cliente" required/>
+      </div>
+      <div class="form-group">
+        <label>Nome da empresa</label>
+        <input type="text" name="nome" placeholder="ex: Valentim Imoveis" required/>
+      </div>
+      <div class="form-group">
+        <label>E-mail do cliente</label>
+        <input type="email" name="email" placeholder="cliente@email.com" required/>
+      </div>
+      <div class="form-group">
+        <label>Kommo Subdomain</label>
+        <input type="text" name="subdomain" placeholder="ex: minhaempresa" required/>
+      </div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label>Kommo Token</label>
+        <input type="text" name="token" placeholder="token de acesso do Kommo" required/>
+      </div>
+      <div class="form-group">
+        <label>Cor primaria</label>
+        <input type="color" name="cor" value="#3b82f6" style="width:100%;height:38px;padding:2px;border:1px solid #1d2740;border-radius:6px;background:#0f1320;cursor:pointer"/>
+      </div>
+      <div class="form-group">
+        <label>Cor secundaria</label>
+        <input type="color" name="cor2" value="#1e3a8a" style="width:100%;height:38px;padding:2px;border:1px solid #1d2740;border-radius:6px;background:#0f1320;cursor:pointer"/>
+      </div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label>Imagem de fundo do painel (opcional)</label>
+        <input type="file" name="logo_file" accept="image/*" style="background:#0f1320;border:1px solid #1d2740;border-radius:6px;padding:6px;color:#eaeef7;width:100%"/>
+      </div>
+    </div>
+    <button class="add-btn" type="submit">Criar cliente</button>
+  </form>
+</div>
+<div class="clients-grid">
+{clientes_html}
+</div>
+</div>
+
+<!-- Tab: Emails -->
+<div id="tab-emails" class="tab-content hidden">
+__EMAIL_TAB__
+</div>
+
+<!-- Tab: Canais & QR -->
+<div id="tab-canais" class="tab-content hidden">
+__CANAL_TAB__
+</div>
+
+<!-- Tab: Corretores -->
+<div id="tab-corretores" class="tab-content hidden">
+__CORRETORES_TAB__
+</div>
+
+</div><!-- /max-width -->
+<script>
+function switchTab(name) {{
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.remove('hidden');
+  document.getElementById('tb' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
+  try {{ localStorage.setItem('adminTab', name); }} catch(e) {{}}
+}}
+// Restaura última aba
+(function() {{
+  try {{
+    var t = localStorage.getItem('adminTab');
+    if (t) switchTab(t);
+  }} catch(e) {{}}
+}})();
+</script>
+</body>
+</html>"""
+
+# HTTP SERVER
+_thread_pool = ThreadPoolExecutor(max_workers=60)  # máx 60 threads simultâneas
+
+class ThreadedHTTPServer(HTTPServer):
+    allow_reuse_address = True
+    request_queue_size  = 128   # fila de conexões pendentes
+
+    def process_request(self, request, client_address):
+        """Usa pool fixo em vez de criar thread nova por requisição."""
+        _thread_pool.submit(self.__process, request, client_address)
+
+    def __process(self, request, client_address):
+        try:
+            self.finish_request(request, client_address)
+        except Exception:
+            self.handle_error(request, client_address)
+        finally:
+            self.shutdown_request(request)
+
+class Handler(BaseHTTPRequestHandler):
+    timeout = 30   # fecha conexão travada após 30s
+
+    def log_message(self, fmt, *args):
+        pass   # silencia logs de acesso no console
+
+    def send_html(self, code, html_bytes):
+        self.send_response(code)
+        self.send_header("Content-Type",   "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(html_bytes)))
+        self.end_headers()
+        self.wfile.write(html_bytes)
+
+    def send_json(self, code, obj):
+        body = json.dumps(obj, ensure_ascii=False).encode()
+        self.send_response(code)
+        self.send_header("Content-Type",   "application/json; charset=utf-8")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def redirect(self, location):
+        self.send_response(302)
+        self.send_header("Location", location)
+        self.end_headers()
+
+    def set_cookie(self, name, value, max_age=43200):
+        self.send_header("Set-Cookie", f"{name}={value}; Path=/; HttpOnly; Secure; Max-Age={max_age}; SameSite=Lax")
+
+    def clear_cookie(self, name):
+        self.send_header("Set-Cookie", f"{name}=; Path=/; HttpOnly; Max-Age=0")
+
+    MAX_BODY = 10 * 1024 * 1024  # 10 MB limite de body
+
+    def read_body(self):
+        length = min(int(self.headers.get("Content-Length", 0)), self.MAX_BODY)
+        return self.rfile.read(length).decode("utf-8", errors="replace") if length else ""
+
+    def parse_form(self):
+        body = self.read_body()
+        result = {}
+        for pair in body.split("&"):
+            if "=" in pair:
+                k, _, v = pair.partition("=")
+                from urllib.parse import unquote_plus
+                result[unquote_plus(k)] = unquote_plus(v)
+        return result
+
+    def parse_multipart(self):
+        import re as _re
+        ctype   = self.headers.get("Content-Type", "")
+        clength = min(int(self.headers.get("Content-Length", 0) or 0), self.MAX_BODY)
+        raw     = self.rfile.read(clength) if clength else b""
+        fields, files = {}, {}
+        m = _re.search(rb"boundary=([^\s;]+)", ctype.encode())
+        if not m:
+            # fallback: trata como form normal
+            from urllib.parse import parse_qs
+            decoded = raw.decode("utf-8", errors="replace")
+            for k, vs in parse_qs(decoded).items():
+                fields[k] = vs[0]
+            return fields, files
+        boundary = b"--" + m.group(1).strip(b'"')
+        parts = raw.split(boundary)
+        for part in parts[1:]:
+            if part in (b"--\r\n", b"--", b"\r\n--"):
+                continue
+            if b"\r\n\r\n" not in part:
+                continue
+            header_raw, _, body = part.partition(b"\r\n\r\n")
+            body = body.rstrip(b"\r\n")
+            header_str = header_raw.decode("utf-8", errors="replace")
+            nm = _re.search(r'name="([^"]+)"', header_str)
+            fm = _re.search(r'filename="([^"]*)"', header_str)
+            if not nm:
+                continue
+            name = nm.group(1)
+            if fm and fm.group(1):
+                class _File:
+                    pass
+                f = _File()
+                f.filename = fm.group(1)
+                f.file     = __import__("io").BytesIO(body)
+                files[name] = f
+            else:
+                fields[name] = body.decode("utf-8", errors="replace")
+        return fields, files
+
+    def render_login(self, error="", title=None, logo="", cor="#3b82f6", prefill=""):
+        t = title or CFG["nome_empresa"]
+        logo_tag = f'<img src="{logo}" style="max-height:48px;border-radius:8px;display:block;margin:0 auto 12px"/>' if logo else ""
+        html = LOGIN_HTML.format(
+            title=t, cor=cor, logo_tag=logo_tag,
+            err_display="block" if error else "none",
+            err_msg=error or "",
+            username_value=prefill
+        )
+        return html.encode("utf-8")
+
+    def _build_email_tab(self, users):
+        """Constrói o HTML da aba Emails do admin — sem passar por .format() do ADMIN_HTML."""
+        smtp_ok     = bool(GMAIL_USER and GMAIL_PASS)
+        smtp_cor    = "#22c55e" if smtp_ok else "#ef4444"
+        smtp_bg     = "#0a1f0a" if smtp_ok else "#1f0a0a"
+        smtp_border = "#166534" if smtp_ok else "#7f1d1d"
+        smtp_txt    = ("✅ SMTP configurado — " + GMAIL_USER) if smtp_ok else "❌ SMTP não configurado (defina GMAIL_USER e GMAIL_PASS)"
+
+        with _email_log_lock:
+            log_copy = list(_email_log)
+        n_log = len(log_copy)
+        n_ok  = sum(1 for e in log_copy if e["status"] == "ok")
+        n_err = sum(1 for e in log_copy if e["status"] == "erro")
+
+        # ── Opções de clientes para o dropdown ────────────────────────────────
+        opts = '<option value="">📤 Todos os clientes (com email)</option>'
+        for uname, ud in (users or {}).items():
+            em   = ud.get("raiox_email") or ud.get("email") or ""
+            nome = ud.get("nome", uname)
+            if em:
+                opts += f'<option value="{uname}">{nome} — {em}</option>'
+
+        # ── Linhas do log ──────────────────────────────────────────────────────
+        TIPO_LABEL  = {"manha": "☀️ Relatório Manhã", "semana": "📅 Relatório Semana",
+                       "alerta": "🔔 Alerta", "raiox": "📊 Raio-X"}
+        STATUS_CLS  = {"ok": "#22c55e", "erro": "#ef4444", "sem_config": "#f59e0b"}
+        STATUS_ICON = {"ok": "✅", "erro": "❌", "sem_config": "⚠️"}
+        rows = ""
+        for i, e in enumerate(log_copy):
+            cor        = STATUS_CLS.get(e["status"], "#94a3b8")
+            icon       = STATUS_ICON.get(e["status"], "•")
+            tipo_l     = TIPO_LABEL.get(e["tipo"], e["tipo"])
+            ts_fmt     = e["ts"].replace("T", " ")
+            ass_esc    = e["assunto"].replace("<","&lt;").replace(">","&gt;")
+            dest_esc   = e["destinatario"].replace("<","&lt;").replace(">","&gt;")
+            rows += (
+                f'<tr onclick="verPreviewEmail({i})" style="cursor:pointer" class="erow">'
+                f'<td style="color:#64748b;font-size:11px;white-space:nowrap">{ts_fmt}</td>'
+                f'<td style="font-size:12px">{tipo_l}</td>'
+                f'<td style="color:#60a5fa;font-size:12px">{dest_esc}</td>'
+                f'<td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">{ass_esc}</td>'
+                f'<td style="color:{cor};font-weight:700;font-size:12px">{icon} {e["status"]}</td>'
+                f'</tr>'
+            )
+        if not rows:
+            rows = "<tr><td colspan='5' style='text-align:center;color:#475569;padding:32px 0;font-size:13px'>Nenhum email enviado ainda nesta sessão.</td></tr>"
+
+        return f"""
+<div style="max-width:860px">
+
+  <!-- SMTP Status -->
+  <div style="background:{smtp_bg};border:1px solid {smtp_border};border-radius:10px;
+       padding:12px 18px;font-size:13px;font-weight:600;color:{smtp_cor};margin-bottom:20px">
+    {smtp_txt}
+    <span style="font-size:11px;font-weight:400;color:#64748b;margin-left:16px">
+      Automático: ☀️ 06:00 (relatório ontem) &nbsp;·&nbsp; 📅 19:00 (semana) &nbsp;·&nbsp; 📊 Dia 31 às 08:00 (Raio-X mensal — dia 28 em meses curtos)
+    </span>
+  </div>
+
+  <!-- Envio Manual -->
+  <div style="background:#0f1320;border:1px solid #1d2740;border-radius:14px;
+       overflow:hidden;margin-bottom:20px">
+    <div style="background:#0a0f1e;border-bottom:1px solid #1d2740;padding:14px 20px;
+         display:flex;align-items:center;gap:10px">
+      <div style="background:#1e3a8a;width:34px;height:34px;border-radius:8px;
+           display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">✉️</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#eaeef7">Envio Manual</div>
+        <div style="font-size:11px;color:#64748b;margin-top:1px">
+          Escolha o cliente e o tipo de relatório para enviar agora
+        </div>
+      </div>
+    </div>
+    <div style="padding:20px 24px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+        <div>
+          <label style="font-size:11px;color:#8590a8;text-transform:uppercase;
+                 letter-spacing:.07em;font-weight:700;display:block;margin-bottom:6px">
+            Cliente
+          </label>
+          <select id="sendCliente" style="width:100%;background:#131a2b;border:1px solid #1d2740;
+                  color:#eaeef7;padding:9px 12px;border-radius:7px;font-size:13px;font-family:inherit">
+            {opts}
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:#8590a8;text-transform:uppercase;
+                 letter-spacing:.07em;font-weight:700;display:block;margin-bottom:6px">
+            Tipo de relatório
+          </label>
+          <select id="sendTipo" style="width:100%;background:#131a2b;border:1px solid #1d2740;
+                  color:#eaeef7;padding:9px 12px;border-radius:7px;font-size:13px;font-family:inherit">
+            <option value="manha">☀️ Relatório de Ontem (manhã)</option>
+            <option value="semana">📅 Relatório da Semana</option>
+          </select>
+        </div>
+      </div>
+      <button onclick="enviarEmailManual()" id="btnEnviar"
+              style="background:#1e3a8a;border:none;color:#fff;font-size:13px;font-weight:700;
+                     padding:10px 24px;border-radius:8px;cursor:pointer;font-family:inherit;
+                     transition:opacity .15s">
+        ✉️ Enviar agora
+      </button>
+      <div id="sendResult" style="margin-top:12px;font-size:13px;display:none"></div>
+    </div>
+  </div>
+
+  <!-- Contadores -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+    <div style="background:#0f1320;border:1px solid #1d2740;border-radius:10px;padding:14px 16px">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:4px">Enviados (sessão)</div>
+      <div style="font-size:26px;font-weight:800;color:#3b82f6">{n_log}</div>
+    </div>
+    <div style="background:#0f1320;border:1px solid #1d2740;border-radius:10px;padding:14px 16px">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:4px">Entregues</div>
+      <div style="font-size:26px;font-weight:800;color:#22c55e">{n_ok}</div>
+    </div>
+    <div style="background:#0f1320;border:1px solid #1d2740;border-radius:10px;padding:14px 16px">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:4px">Erros</div>
+      <div style="font-size:26px;font-weight:800;color:#ef4444">{n_err}</div>
+    </div>
+  </div>
+
+  <!-- Log de emails -->
+  <div style="background:#0f1320;border:1px solid #1d2740;border-radius:12px;overflow:hidden">
+    <div style="background:#0a0f1e;border-bottom:1px solid #1d2740;padding:12px 18px;
+         display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:13px;font-weight:700;color:#eaeef7">📋 Histórico desta sessão</span>
+      <button onclick="location.reload()" style="background:#1e293b;border:1px solid #1d2740;
+              color:#8590a8;font-size:11px;font-weight:600;padding:5px 12px;border-radius:6px;
+              cursor:pointer;font-family:inherit">↻ Atualizar</button>
+    </div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead>
+          <tr style="background:#0a0f1e">
+            <th style="padding:10px 14px;text-align:left;font-size:10px;text-transform:uppercase;
+                letter-spacing:.05em;color:#64748b;border-bottom:1px solid #1d2740">Data/Hora</th>
+            <th style="padding:10px 14px;text-align:left;font-size:10px;text-transform:uppercase;
+                letter-spacing:.05em;color:#64748b;border-bottom:1px solid #1d2740">Tipo</th>
+            <th style="padding:10px 14px;text-align:left;font-size:10px;text-transform:uppercase;
+                letter-spacing:.05em;color:#64748b;border-bottom:1px solid #1d2740">Destinatário</th>
+            <th style="padding:10px 14px;text-align:left;font-size:10px;text-transform:uppercase;
+                letter-spacing:.05em;color:#64748b;border-bottom:1px solid #1d2740">Assunto</th>
+            <th style="padding:10px 14px;text-align:left;font-size:10px;text-transform:uppercase;
+                letter-spacing:.05em;color:#64748b;border-bottom:1px solid #1d2740">Status</th>
+          </tr>
+        </thead>
+        <tbody id="emailLogBody">{rows}</tbody>
+      </table>
+    </div>
+    <div style="padding:10px 18px;font-size:11px;color:#475569;text-align:right;
+         border-top:1px solid #1d274022">
+      {n_log} email(s) registrado(s) nesta sessão
+    </div>
+  </div>
+
+</div>
+
+<!-- Preview modal -->
+<div id="emailPreviewOverlay" onclick="fecharEmailPreview(event)"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);
+            z-index:1000;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#0f172a;border:1px solid #1d2740;border-radius:12px;
+       width:100%;max-width:640px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column">
+    <div style="padding:14px 18px;border-bottom:1px solid #1d2740;
+         display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700">
+      <span id="emailPreviewTitle">Pré-visualização</span>
+      <button onclick="fecharEmailPreview()" style="background:none;border:none;
+              color:#94a3b8;cursor:pointer;font-size:18px;font-family:inherit">✕</button>
+    </div>
+    <iframe id="emailPreviewFrame" style="flex:1;border:none;background:#0f172a;min-height:400px"
+            src="about:blank"></iframe>
+  </div>
+</div>
+
+<script>
+function enviarEmailManual() {{
+  var cliente = document.getElementById('sendCliente').value;
+  var tipo    = document.getElementById('sendTipo').value;
+  var btn     = document.getElementById('btnEnviar');
+  var res     = document.getElementById('sendResult');
+  btn.disabled = true;
+  btn.textContent = '⏳ Enviando...';
+  btn.style.opacity = '.6';
+  res.style.display = 'none';
+  fetch('/api/admin/emails/send', {{
+    method: 'POST',
+    headers: {{'Content-Type': 'application/json'}},
+    credentials: 'include',
+    body: JSON.stringify({{tipo: tipo, username: cliente}})
+  }})
+  .then(r => r.json())
+  .then(j => {{
+    res.style.display = 'block';
+    if (j.ok) {{
+      res.style.color = '#22c55e';
+      res.innerHTML = '✅ ' + (j.msg || 'Enviado com sucesso!');
+    }} else {{
+      res.style.color = '#ef4444';
+      res.innerHTML = '❌ ' + (j.erro || 'Erro ao enviar.');
+    }}
+    setTimeout(() => location.reload(), 3000);
+  }})
+  .catch(() => {{
+    res.style.display = 'block';
+    res.style.color = '#ef4444';
+    res.textContent = '❌ Erro de conexão.';
+    btn.disabled = false;
+    btn.textContent = '✉️ Enviar agora';
+    btn.style.opacity = '1';
+  }});
+}}
+
+function verPreviewEmail(idx) {{
+  document.getElementById('emailPreviewTitle').textContent = 'Carregando...';
+  document.getElementById('emailPreviewFrame').src = '/api/admin/emails/preview?idx=' + idx;
+  var ov = document.getElementById('emailPreviewOverlay');
+  ov.style.display = 'flex';
+  document.getElementById('emailPreviewFrame').onload = function() {{
+    document.getElementById('emailPreviewTitle').textContent = 'Pré-visualização do Email';
+  }};
+}}
+function fecharEmailPreview(e) {{
+  if (!e || e.target === document.getElementById('emailPreviewOverlay')) {{
+    document.getElementById('emailPreviewOverlay').style.display = 'none';
+    document.getElementById('emailPreviewFrame').src = 'about:blank';
+  }}
+}}
+document.addEventListener('keydown', function(e) {{
+  if (e.key === 'Escape') fecharEmailPreview();
+}});
+// highlight rows on hover
+document.querySelectorAll('.erow').forEach(function(r) {{
+  r.addEventListener('mouseenter', function() {{ this.style.background='rgba(255,255,255,.04)'; }});
+  r.addEventListener('mouseleave', function() {{ this.style.background=''; }});
+}});
+</script>
