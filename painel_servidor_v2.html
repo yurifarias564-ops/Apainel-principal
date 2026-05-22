@@ -1808,7 +1808,7 @@ function _renderParadosDetail(idx){
     '<div class="pp-detail">'+
       '<div class="pp-detail-head">'+
         '<span class="pp-detail-title">'+esc(stage.label)+' — '+leads.length+' lead'+(leads.length!==1?'s':'')+' parado'+(leads.length!==1?'s':'')+'</span>'+
-        '<button class="pp-detail-close" onclick="document.getElementById('paradosDetail').innerHTML='<div class=\"pp-placeholder\">📅 Clique em uma barra para ver os leads parados naquela etapa</div>'">×</button>'+
+        '<button class="pp-detail-close" onclick="_clearParadosDetail()">×</button>'+
       '</div>'+
       '<div style="overflow-x:auto">'+
         '<table class="pp-table">'+
@@ -1817,6 +1817,11 @@ function _renderParadosDetail(idx){
         '</table>'+
       '</div>'+
     '</div>';
+}
+
+function _clearParadosDetail(){
+  const el=document.getElementById('paradosDetail');
+  if(el) el.innerHTML='<div class="pp-placeholder">📅 Clique em uma barra para ver os leads parados naquela etapa</div>';
 }
 
 function _renderTabVendedores(data){
